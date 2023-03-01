@@ -62,7 +62,8 @@
 				
 				
 				$.ajax({
-						  url: "/~team2/admin/ajax_calendar_edit",
+						headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+						  url: "/calendar_edit",
 						  type: "POST",
 						  data : {
 								title : obj.event._def.title,
@@ -90,6 +91,7 @@
 				var title = prompt('日程入力:');
 				if (title) {
 					$.ajax({
+						headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
 						  url: "/~team2/admin/ajax_calendar_add",
 						  type: "POST",
 						  data : {
@@ -126,6 +128,7 @@
 				if (confirm('日程を削除しますか?')) 
 				{ 
 					$.ajax({
+						headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
 						  url: "/~team2/admin/ajax_calendar_delete",
 						  type: "POST",
 						  data : {
@@ -231,7 +234,7 @@
 			editable: true, // 수정 가능
 			nowIndicator: true, // 현재 시간 마크
 			dayMaxEvents: true, // 이벤트가 오버되면 높이 제한 (+ 몇 개식으로 표현)
-			locale: 'ko', // 한국어 설정
+			locale: 'ja', // 한국어 설정
 			eventAdd: function(obj) { // 이벤트가 추가되면 발생하는 이벤트
 				console.log('add');
 				
@@ -260,7 +263,7 @@
 				
 				
 				$.ajax({
-						  url: "/~team2/admin/ajax_calendar_edit",
+						  url: "/calendar_edit",
 						  type: "POST",
 						  data : {
 								title : obj.event._def.title,
@@ -285,10 +288,10 @@
 			},
 			select: function(arg) { // 캘린더에서 드래그로 이벤트 생성
 				
-				var title = prompt('입력할 일정:');
+				var title = prompt('日程入力:');
 				if (title) {
 					$.ajax({
-						  url: "/~team2/admin/ajax_calendar_add",
+						  url: "/calendar_add",
 						  type: "POST",
 						  data : {
 								title: title,
@@ -324,7 +327,7 @@
 				if (confirm('일정을 삭제하시겠습니까?')) 
 				{ 
 					$.ajax({
-						  url: "/~team2/admin/ajax_calendar_delete",
+						  url: "/calendar_delete",
 						  type: "POST",
 						  data : {
 								title : arg.event._def.title
@@ -351,7 +354,7 @@
 			},
 			events: function(info, successCallback, failureCallback){ // ajax 처리로 데이터를 로딩 시킨다. 
 				$.ajax({
-					  url: "/~team2/admin/ajax_calendar_load",
+					  url: "/calendar_load",
 					  type: "POST",
 					  dataType: "JSON",
 					  traditional: true,
