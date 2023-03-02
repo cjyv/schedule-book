@@ -19,7 +19,5 @@ Auth::routes();
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::post('/calendar_edit','CalendarController@edit');
-Route::post('/calendar_add','CalendarController@add');
-Route::post('/calendar_delete','CalendarController@delete');
-Route::post('/calendar_load','CalendarController@load');
+Route::post('/schedule-add', [ScheduleController::class, 'scheduleAdd'])->name('schedule-add');
+Route::post('/schedule-get', [ScheduleController::class, 'scheduleGet'])->name('schedule-get');

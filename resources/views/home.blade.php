@@ -15,9 +15,8 @@
                         </div>
                     @endif
 
-    <div id='calendar'></div>
-
-
+                    <div id='calendar'></div>
+                    
                 </div>
             </div>
         </div>
