@@ -23,7 +23,7 @@ let calendar = new Calendar(calendarEl, {
 	nowIndicator: true, 
     dayMaxEvents: true,
     locale: "ja",
-    eventAdd: function(obj) { 
+    eventAdd: function(info) { 
         console.log('add');
         
     },
@@ -34,23 +34,36 @@ let calendar = new Calendar(calendarEl, {
 
         // 入力ダイアログ
         const eventName = prompt("イベントを入力してください");
-       ;
+       
         if (eventName) {
             // Laravelの登録処理の呼び出し
             axios
                 .post("/schedule-add", {
-                    start_date: info.start.valueOf(),
-                    end_date: info.end.valueOf(),
+                    start_date: info.startStr,
+                    end_date: info.endStr,
                     event_name: eventName,
+                    allDay:true
                 })
                 .then(() => {
                     // イベントの追加
+                    
+                   if ( info.startStr.indexOf("00:00:00")!=-1&&info.endStr.indexOf("00:00:00")!=-1) {
                     calendar.addEvent({
                         title: eventName,
-                        start: info.start,
-                        end: info.end,
-                        allDay: true,
+                        start: info.startStr,
+                        end: info.endStr,
+                        allDay:true
                     });
+                   } else{
+                    calendar.addEvent({
+                        title: eventName,
+                        start: info.startStr,
+                        end: info.endStr
+                    });
+                }
+                console.log(info.end);
+                    
+                    alert("登録しました。");
                 })
                 .catch((error) => {
                     throw new Error(error);
@@ -59,8 +72,8 @@ let calendar = new Calendar(calendarEl, {
         }
     },
 
-    eventChange: function(obj) {
-        var start = obj.event._instance.range.start;
+    eventChange: function(info) {
+        var start = info.event._instance.range.start;
         if(start.getHours() == 9) {
             start = moment(start).format('YYYY-MM-DD') + " 00:00";
         }
@@ -70,7 +83,7 @@ let calendar = new Calendar(calendarEl, {
         }
         
         
-        var end = obj.event._instance.range.end;
+        var end = info.event._instance.range.end;
         if(end.getHours() == 9) {
             end = moment(end).format('YYYY-MM-DD') + " 00:00";
         }
@@ -78,24 +91,73 @@ let calendar = new Calendar(calendarEl, {
             end = end.setHours(end.getHours() - 9);
             end = moment(end).format('YYYY-MM-DD hh:mm');
         }
+        console.log(start);
+        console.log(end);
+       console.log(info.event._def.publicId);
+        axios
+        .post("/schedule-edit", {
+            start_date: start,
+            end_date: end,
+            id: info.event._def.publicId
+        })
+        .then((response) => {
+           alert("修正成功");
+        })
+        .catch((error) => {
+            // バリデーションエラーなど
+          
+            console.log(error);
+            alert("修正失敗");
+        });
+
 
     },droppable: true,
-    eventRemove: function(obj){ 
+    eventRemove: function(info){ 
         console.log('remove');
-        
+    
     },
+    eventClick: function(info) { 
+        console.log(info);
+        if (confirm('イベントを削除しますか?')) 
+        { 
+            axios
+            .post("/schedule-delete", {
+                id: info.event._def.publicId
+
+            })
+            .then(() => {
+                info.event.remove();
+                alert("イベントの削除を成功しました。");
+            })
+            .catch((error) => {
+                console.log(error);
+                alert("イベントの削除を失敗しました。");
+            });
+        }
+
+    },
+
     events: function (info, successCallback, failureCallback) {
         // Laravelのイベント取得処理の呼び出し
         console.log(info);
         axios
             .post("/schedule-get", {
-                start_date: info.start.valueOf(),
-                end_date: info.end.valueOf(),
+                start_date: info.startStr,
+                end_date: info.endStr,
+                
             })
             .then((response) => {
                 // 追加したイベントを削除
-                calendar.removeAllEvents();
+                //calendar.removeAllEvents();
                 // カレンダーに読み込み
+                for (let i = 0; i < response.data.length; i++) {
+                   
+                    if(response.data[i].start.indexOf("00:00:00")!=-1&&response.data[i].end.indexOf("00:00:00")!=-1){
+                        response.data[i].start=moment(response.data[i].start).format('YYYY-MM-DD');
+                        response.data[i].end=moment(response.data[i].end).format('YYYY-MM-DD');
+                    }
+                }
+                //console.log(response.data);
                 successCallback(response.data);
             })
             .catch((error) => {
